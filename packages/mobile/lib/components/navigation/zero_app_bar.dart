@@ -97,7 +97,11 @@ class ZeroAppBar extends StatelessWidget implements PreferredSizeWidget {
       statusBarBrightness: adaptiveStyle.statusBarBrightness,
     );
 
-    final isNoLeading = !automaticallyImplyLeading && leading == null;
+    final isNoLeading = !_checkHasLeading(
+          context: context,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+        ) &&
+        leading == null;
 
     return Semantics(
       container: true,
@@ -105,96 +109,95 @@ class ZeroAppBar extends StatelessWidget implements PreferredSizeWidget {
         value: overlayStyle,
         child: Semantics(
           excludeSemantics: true,
-          child: ClipRect(
-            child: Ink(
-              decoration: BoxDecoration(
-                color: adaptiveStyle.backgroundColor,
-                boxShadow: adaptiveStyle.shadows,
-              ),
-              child: SafeArea(
-                left: false,
-                right: false,
-                bottom: false,
-                child: SizedBox(
-                  height: height,
-                  child: IconTheme(
-                    data: IconThemeData(
-                      size: 24,
-                      color: adaptiveStyle.foregroundColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox(
-                          height: min(
-                            min(ZeroAppBarSize.small.getSize, size.getSize),
-                            height,
-                          ),
-                          child: Center(
-                            child: Row(
-                              children: [
-                                // Build leading
-                                _Leading(
-                                  automaticallyImplyLeading:
-                                      automaticallyImplyLeading,
-                                  leading: leading,
-                                ),
+          child: Material(
+            color: adaptiveStyle.backgroundColor,
+            elevation: adaptiveStyle.elevation ?? 0,
+            shadowColor: adaptiveStyle.shadowColor,
+            child: SafeArea(
+              left: false,
+              right: false,
+              bottom: false,
+              child: SizedBox(
+                height: height,
+                child: IconTheme(
+                  data: IconThemeData(
+                    size: 24,
+                    color: adaptiveStyle.foregroundColor,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: min(
+                          min(ZeroAppBarSize.small.getSize, size.getSize),
+                          height,
+                        ),
+                        child: Center(
+                          child: Row(
+                            children: [
+                              // Build leading
+                              _Leading(
+                                automaticallyImplyLeading:
+                                    automaticallyImplyLeading,
+                                leading: leading,
+                              ),
 
-                                // Build spacing based on conditions
-                                if (isNoLeading)
-                                  const SizedBox(width: 16)
-                                else if (adaptiveStyle.centerTitle == true)
-                                  const SizedBox.shrink()
-                                else
-                                  SizedBox(
-                                    width: adaptiveStyle.titleSpacing ?? 32,
-                                  ),
-
-                                // Build title small size
-                                Expanded(
-                                  child: size == ZeroAppBarSize.small
-                                      ? _Title(
-                                          style: adaptiveStyle,
-                                          title: title,
-                                        )
-                                      : const SizedBox.shrink(),
-                                ),
-
-                                // Build actions
-                                Row(
-                                  children: actions ??
-                                      (adaptiveStyle.centerTitle == true
-                                          ? [
-                                              SizedBox.square(
-                                                  dimension:
-                                                      isNoLeading ? 16 : 48)
-                                            ]
-                                          : []),
+                              // Build spacing based on conditions
+                              if (isNoLeading)
+                                SizedBox(
+                                  width: adaptiveStyle.titleSpacing ?? 16,
                                 )
-                              ],
-                            ),
+                              else if (adaptiveStyle.centerTitle == true)
+                                const SizedBox.shrink()
+                              else
+                                SizedBox(
+                                  width: adaptiveStyle.titleSpacing ?? 32,
+                                ),
+
+                              // Build title small size
+                              Expanded(
+                                child: size == ZeroAppBarSize.small
+                                    ? _Title(
+                                        style: adaptiveStyle,
+                                        title: title,
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
+
+                              // Build actions
+                              Row(
+                                children: actions ??
+                                    (adaptiveStyle.centerTitle == true
+                                        ? [
+                                            SizedBox.square(
+                                                dimension:
+                                                    isNoLeading ? 16 : 48)
+                                          ]
+                                        : []),
+                              )
+                            ],
                           ),
                         ),
+                      ),
 
-                        // Build title when size is not small
-                        if (size != ZeroAppBarSize.small) ...[
-                          const Spacer(),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              bottom: size == ZeroAppBarSize.large ? 20 : 16,
-                              left: 16,
-                            ),
-                            child: _Title(style: adaptiveStyle, title: title),
+                      // Build title when size is not small
+                      if (size != ZeroAppBarSize.small) ...[
+                        const Spacer(),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: size == ZeroAppBarSize.large ? 20 : 16,
+                            left: 16,
                           ),
-                        ],
-
-                        if (bottom != null) ...[
-                          const Spacer(),
-                          bottom!,
-                        ],
+                          child: _Title(style: adaptiveStyle, title: title),
+                        ),
                       ],
-                    ),
+
+                      if (bottom != null) ...[
+                        const Spacer(),
+                        bottom!,
+                      ],
+                    ],
                   ),
                 ),
               ),
@@ -236,6 +239,22 @@ class _Title extends StatelessWidget {
   }
 }
 
+bool _checkHasLeading({
+  required BuildContext context,
+  required bool automaticallyImplyLeading,
+}) {
+  if (automaticallyImplyLeading == false) {
+    return false;
+  }
+
+  final scaffold = Scaffold.maybeOf(context);
+  final parentRoute = ModalRoute.of(context);
+  final hasDrawer = scaffold?.hasDrawer ?? false;
+  final canPop = parentRoute?.canPop ?? false;
+
+  return hasDrawer || canPop;
+}
+
 /// A widget for building leading of [ZeroAppBar]
 class _Leading extends StatelessWidget {
   const _Leading({
@@ -251,37 +270,42 @@ class _Leading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (automaticallyImplyLeading == false || leading != null) {
-      return leading ?? const SizedBox.shrink();
-    }
+    final hasLeading = _checkHasLeading(
+      context: context,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+    );
 
-    final scaffold = Scaffold.maybeOf(context);
-    final parentRoute = ModalRoute.of(context);
-    final hasDrawer = scaffold?.hasDrawer ?? false;
-    final canPop = parentRoute?.canPop ?? false;
-    final localization = MaterialLocalizations.of(context);
+    if (leading != null) return leading!;
 
-    // Build leading when have drawer in scaffold
-    if (hasDrawer) {
-      return IconButton(
-        // Action to open drawer
-        onPressed: () {
-          Scaffold.of(context).openDrawer();
-        },
-        icon: const Icon(ZeroIcons.menu),
-        tooltip: localization.openAppDrawerTooltip,
-      );
-    }
+    if (hasLeading) {
+      final scaffold = Scaffold.maybeOf(context);
+      final parentRoute = ModalRoute.of(context);
+      final hasDrawer = scaffold?.hasDrawer ?? false;
+      final canPop = parentRoute?.canPop ?? false;
+      final localization = MaterialLocalizations.of(context);
 
-    // Build leading back button
-    if (canPop) {
-      return IconButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        icon: const Icon(ZeroIcons.arrowLeft),
-        tooltip: localization.backButtonTooltip,
-      );
+      // Build leading when have drawer in scaffold
+      if (hasDrawer) {
+        return IconButton(
+          // Action to open drawer
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+          icon: const Icon(ZeroIcons.menu),
+          tooltip: localization.openAppDrawerTooltip,
+        );
+      }
+
+      // Build leading back button
+      if (canPop) {
+        return IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(ZeroIcons.arrowLeft),
+          tooltip: localization.backButtonTooltip,
+        );
+      }
     }
 
     return const SizedBox.shrink();
