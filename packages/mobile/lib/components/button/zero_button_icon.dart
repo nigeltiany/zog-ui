@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zog_ui/zog_ui.dart';
 
-enum _ZeroButtonIconType {
+enum ZeroButtonIconType {
   primary,
   secondary,
   disabled;
@@ -9,12 +9,12 @@ enum _ZeroButtonIconType {
   /// Get state current type is primary or not
   ///
   /// If primary return true, otherwise return false
-  bool get isPrimary => this == _ZeroButtonIconType.primary;
+  bool get isPrimary => this == ZeroButtonIconType.primary;
 
   /// Get state current type is secondary or not
   ///
   /// If secondary return true, otherwise return false
-  bool get isSecondary => this == _ZeroButtonIconType.secondary;
+  bool get isSecondary => this == ZeroButtonIconType.secondary;
 }
 
 class ZeroButtonIcon extends StatelessWidget {
@@ -33,10 +33,23 @@ class ZeroButtonIcon extends StatelessWidget {
   final ZeroButtonSize size;
 
   /// Local type button primary, secondary, or disabeld
-  final _ZeroButtonIconType _type;
+  final ZeroButtonIconType type;
 
   /// Border radius of [ZeroButtonIcon]
   final ZeroButtonRadiusType borderRadiusType;
+
+  /// Build button icon with any style
+  ///
+  /// By default when [onPressed] is null, automatically style is disabled
+  const ZeroButtonIcon({
+    Key? key,
+    required this.icon,
+    required this.onPressed,
+    this.style,
+    this.size = ZeroButtonSize.medium,
+    this.borderRadiusType = ZeroButtonRadiusType.rectangle,
+    this.type = ZeroButtonIconType.primary,
+  }) : super(key: key);
 
   /// Build button icon with primary style
   ///
@@ -48,7 +61,7 @@ class ZeroButtonIcon extends StatelessWidget {
     this.style,
     this.size = ZeroButtonSize.medium,
     this.borderRadiusType = ZeroButtonRadiusType.rectangle,
-  })  : _type = _ZeroButtonIconType.primary,
+  })  : type = ZeroButtonIconType.primary,
         super(key: key);
 
   /// Build button icon with secondary style
@@ -61,7 +74,7 @@ class ZeroButtonIcon extends StatelessWidget {
     this.style,
     this.size = ZeroButtonSize.medium,
     this.borderRadiusType = ZeroButtonRadiusType.rectangle,
-  })  : _type = _ZeroButtonIconType.secondary,
+  })  : type = ZeroButtonIconType.secondary,
         super(key: key);
 
   /// Build disabled button
@@ -74,7 +87,7 @@ class ZeroButtonIcon extends StatelessWidget {
     this.size = ZeroButtonSize.medium,
     this.borderRadiusType = ZeroButtonRadiusType.rectangle,
   })  : onPressed = null,
-        _type = _ZeroButtonIconType.disabled,
+        type = ZeroButtonIconType.disabled,
         super(key: key);
 
   @override
@@ -83,11 +96,11 @@ class ZeroButtonIcon extends StatelessWidget {
     final themeStyle = theme.buttonIconStyle;
     ZeroButtonIconStyle? localStyle;
 
-    switch (_type) {
-      case _ZeroButtonIconType.primary:
+    switch (type) {
+      case ZeroButtonIconType.primary:
         localStyle = themeStyle.primaryStyle;
         break;
-      case _ZeroButtonIconType.secondary:
+      case ZeroButtonIconType.secondary:
         localStyle = themeStyle.secondaryStyle;
         break;
       default:
@@ -99,13 +112,13 @@ class ZeroButtonIcon extends StatelessWidget {
         (localStyle ?? ZeroButtonIconStyle.fallback()).merge(style);
     final backgroundColor = isDisabled
         ? theme.disabledBackgroundColor
-        : _type.isPrimary
+        : type.isPrimary
             ? adaptiveStyle.color
             : Colors.transparent;
 
     final iconColor = isDisabled
         ? (themeStyle.disabledColor ?? theme.disabledColor)
-        : (_type.isPrimary
+        : (type.isPrimary
             ? adaptiveStyle.iconColor ?? Colors.white
             : adaptiveStyle.iconColor ??
                 adaptiveStyle.color ??
@@ -113,7 +126,7 @@ class ZeroButtonIcon extends StatelessWidget {
 
     final borderColor = isDisabled
         ? theme.dividerColor
-        : _type.isSecondary
+        : type.isSecondary
             ? iconColor
             : null;
 
