@@ -2029,7 +2029,7 @@ class ZeroTimePickerDialog extends StatefulWidget {
   });
 
   /// When confirm is clicked
-  final VoidCallback? onConfirm;
+  final Function(TimeOfDay timeOfDay)? onConfirm;
 
   /// When cancel is clicked
   final VoidCallback? onCancel;
@@ -2369,8 +2369,8 @@ class _ZeroTimePickerDialogState extends State<ZeroTimePickerDialog>
   }
 
   void _handleCancel() {
-    if (onCancel != null) {
-      onCancel();
+    if (widget.onCancel != null) {
+      widget.onCancel!();
       return;
     }
     Navigator.pop(context);
@@ -2388,8 +2388,8 @@ class _ZeroTimePickerDialogState extends State<ZeroTimePickerDialog>
       }
       form.save();
     }
-    if (onConfirm != null) {
-      onConfirm();
+    if (widget.onConfirm != null) {
+      widget.onConfirm!(_selectedTime.value);
       return;
     }
     Navigator.pop(context, _selectedTime.value);
