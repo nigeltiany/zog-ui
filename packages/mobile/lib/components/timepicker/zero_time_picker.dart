@@ -2024,7 +2024,15 @@ class ZeroTimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.onEntryModeChanged,
     this.style,
+    this.onConfirm,
+    this.onCancel,
   });
+
+  /// When confirm is clicked
+  VoidCallback? onConfirm;
+
+  /// When cancel is clicked
+  VoidCallback? onCancel;
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -2361,6 +2369,10 @@ class _ZeroTimePickerDialogState extends State<ZeroTimePickerDialog>
   }
 
   void _handleCancel() {
+    if (onCancel != null) {
+      onCancel();
+      return;
+    }
     Navigator.pop(context);
   }
 
@@ -2375,6 +2387,10 @@ class _ZeroTimePickerDialogState extends State<ZeroTimePickerDialog>
         return;
       }
       form.save();
+    }
+    if (onConfirm != null) {
+      onConfirm();
+      return;
     }
     Navigator.pop(context, _selectedTime.value);
   }
