@@ -2029,10 +2029,10 @@ class ZeroTimePickerDialog extends StatefulWidget {
   });
 
   /// When confirm is clicked
-  VoidCallback? onConfirm;
+  final VoidCallback? onConfirm;
 
   /// When cancel is clicked
-  VoidCallback? onCancel;
+  final VoidCallback? onCancel;
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
