@@ -74,7 +74,7 @@ Future<T?> showZeroModalBottomSheet<T>(
   );
 }
 
-Future<PersistentBottomSheetController<T>> showZeroBottomSheet<T>(
+Future<PersistentBottomSheetController> showZeroBottomSheet<T>(
   BuildContext context, {
   required WidgetBuilder builder,
   ZeroBottomSheetStyle? style,
